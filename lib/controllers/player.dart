@@ -1,9 +1,11 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter_radio/flutter_radio.dart';
 import 'dart:async';
 
+import 'package:audioplayer/audioplayer.dart';
+
+
 const streamUrl =
-    'http://stm16.abcaudio.tv:25584/player.mp3';
+    'http://stm16.abcaudio.tv:25584/player.mp4';
 
 bool buttonState = true;
 
@@ -47,6 +49,7 @@ void _backgroundAudioPlayerTask() async {
 }
 
 class CustomAudioPlayer extends BackgroundAudioTask {
+  AudioPlayer audioPlayer = new AudioPlayer();
   bool _playing;
   Completer _completer = Completer();
 
@@ -56,15 +59,14 @@ class CustomAudioPlayer extends BackgroundAudioTask {
         album: 'ABC Radio',
         title: 'A rádio que não cansa vc');
     AudioServiceBackground.setMediaItem(mediaItem);
-    audioStart();
     onPlay();
     await _completer.future;
   }
 
-  Future<void> audioStart() async {
-    await FlutterRadio.audioStart();
-    print('Audio Start OK');
-  }
+//  Future<void> audioStart() async {
+//    await controller.setNetworkDataSource(streamUrl, autoPlay: true);
+//    print('Audio Start OK');
+//  }
 
   void playPause() {
     if (_playing)
@@ -73,23 +75,26 @@ class CustomAudioPlayer extends BackgroundAudioTask {
       onPlay();
   }
 
-  void onPlay() {
-    FlutterRadio.play(url: streamUrl);
+  void onPlay() async {
+    await audioPlayer.play(streamUrl);
+    //FlutterRadio.play(url: streamUrl);
     _playing = true;
     AudioServiceBackground.setState(
         controls: [pauseControl, stopControl],
         basicState: BasicPlaybackState.playing);
   }
 
-  void onPause() {
-    FlutterRadio.playOrPause(url: streamUrl);
+  void onPause() async {
+    await audioPlayer.pause();
+   // FlutterRadio.playOrPause(url: streamUrl);
     AudioServiceBackground.setState(
         controls: [playControl, stopControl],
         basicState: BasicPlaybackState.paused);
   }
 
-  void onStop() {
-    FlutterRadio.stop();
+  void onStop() async {
+    await audioPlayer.stop();
+   // FlutterRadio.stop();
     AudioServiceBackground.setState(
         controls: [], basicState: BasicPlaybackState.stopped);
     _completer.complete();
